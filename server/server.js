@@ -9,7 +9,7 @@ const doctorRoutes = require("./routes/doctorRoutes");
 const patientRoutes = require("./routes/patientRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 const medicalRecordRoutes = require("./routes/medicalRecordRoutes");
-
+const queueRoutes = require("./routes/queueRoutes");
 
 const connectDB = require('./config/db');
 const MedicalRecord = require('./models/MedicalRecord');
@@ -25,6 +25,7 @@ app.use("/api/doctors", doctorRoutes);
 app.use("/api/patients", patientRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/medical-records", medicalRecordRoutes);
+app.use("/api/queue", queueRoutes);
 
 connectDB();
 

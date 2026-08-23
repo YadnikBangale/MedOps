@@ -59,3 +59,21 @@ Content-Type: application/json
 
 GET http://localhost:5000/api/medical-records/my
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTgzNTUzMzg1MDJmN2QyYTIxZDQ0NWYiLCJyb2xlIjoicGF0aWVudCIsImlhdCI6MTc4NzUwMDM4NiwiZXhwIjoxNzg3NTg2Nzg2fQ.zV-Amz3Rcr8kiKGF3yp55WPRUT0U9fsYnB9VWA9in3w
+
+### Doctor Login
+
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "rahul@medops.com",
+    "password": "doctor123"
+}
+
+### Doctor View Patient Medical Records
+
+GET http://localhost:5000/api/medical-records/patient/6a835bd1725b1c7512329baf
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTgyMGE2NTJhMGFiMDE0Y2ZmZmNmMmMiLCJyb2xlIjoiZG9jdG9yIiwiaWF0IjoxNzg3NTE2MjUwLCJleHAiOjE3ODc2MDI2NTB9.tcQFKYBE3rVCuDpjF67YSW89wQpQ8SnT_kMpNHNR0rw
+
+
+

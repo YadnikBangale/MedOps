@@ -163,9 +163,48 @@ const getMyMedicalRecord = async (req, res) => {
             message : "Server error"
         });
     }
-}
+};
+
+const getPatientMedicalRecords = async (req, res) => {
+
+    try {
+
+        const patientId = req.params.patientId;
+        const records = await MedicalRecord.find({
+            patient : patientId
+        })
+        .populate({
+
+            path : "doctor",
+            populate : {
+                path : "user",
+                select : "name email"
+            }
+        })
+        .populate("appointment")
+        .sort({
+            createdAt : -1
+        });
+
+        res.status(200).json({
+            success : true,
+            count : records.length,
+            medicalRecords : records
+        });
+
+    }
+    catch(error) {
+
+        console.error("Get patient medical records : ", error);
+        res.status(500).json({
+            success : false,
+            message : "Server error"
+        });
+    }
+};
 
 module.exports = {
     createMedicalRecord,
-    getMyMedicalRecord
+    getMyMedicalRecord,
+    getPatientMedicalRecords
 };
