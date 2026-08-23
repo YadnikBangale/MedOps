@@ -1,0 +1,61 @@
+### Patient Login
+
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "patient2@medops.com",
+    "password": "patient123"
+}
+
+### Create Appointment
+
+PATCH http://localhost:5000/api/appointments/6a88a58d6a7451604eeaad4c/complete
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTgyMGE2NTJhMGFiMDE0Y2ZmZmNmMmMiLCJyb2xlIjoiZG9jdG9yIiwiaWF0IjoxNzg3MzQwMjM2LCJleHAiOjE3ODc0MjY2MzZ9.sJnBVluDk8xiqZXkwRa9of31nc5tG6glekD1cwNcraY
+
+
+### Doctor Login
+
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "rahul@medops.com",
+    "password": "doctor123"
+}   
+
+### Get Doctor Appointments
+
+GET http://localhost:5000/api/appointments/doctor
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTgyMGE2NTJhMGFiMDE0Y2ZmZmNmMmMiLCJyb2xlIjoiZG9jdG9yIiwiaWF0IjoxNzg3NDk5MzAyLCJleHAiOjE3ODc1ODU3MDJ9.HwttfwgNPG4la16_JvxxJSpHA4xYpl5oWSBCE7A_JV4
+
+### Create Medical Record
+
+POST http://localhost:5000/api/medical-records
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTgyMGE2NTJhMGFiMDE0Y2ZmZmNmMmMiLCJyb2xlIjoiZG9jdG9yIiwiaWF0IjoxNzg3NDk5MzAyLCJleHAiOjE3ODc1ODU3MDJ9.HwttfwgNPG4la16_JvxxJSpHA4xYpl5oWSBCE7A_JV4
+
+{
+    "appointment": "6a88a58d6a7451604eeaad4c",
+    "symptoms": "Occasional chest discomfort and palpitations",
+    "diagnosis": "Cardiac arrhythmia",
+    "prescription": "Continue prescribed medication and monitor symptoms",
+    "notes": "Follow-up consultation required after two weeks"
+}
+
+### Patient Login
+
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "patient2@medops.com",
+    "password": "patient123"
+}
+
+
+
+### Get My Medical Records
+
+GET http://localhost:5000/api/medical-records/my
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTgzNTUzMzg1MDJmN2QyYTIxZDQ0NWYiLCJyb2xlIjoicGF0aWVudCIsImlhdCI6MTc4NzUwMDM4NiwiZXhwIjoxNzg3NTg2Nzg2fQ.zV-Amz3Rcr8kiKGF3yp55WPRUT0U9fsYnB9VWA9in3w
