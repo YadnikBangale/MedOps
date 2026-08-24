@@ -2,6 +2,7 @@ const queue = require("../models/Queue");
 const Appointment = require("../models/Appointment");
 const Patient = require("../models/Patient");
 const Doctor = require("../models/Doctor");
+const Queue = require("../models/Queue");
 
 const addToQueue = async (req, res) => {
 
@@ -63,6 +64,10 @@ const addToQueue = async (req, res) => {
             });
         }
 
+        const doctor = await Doctor.findById(
+            appointmentData.doctor
+        );
+
         if(!doctor) {
             return res.status(404).json({
                 success : false,
@@ -115,6 +120,309 @@ const addToQueue = async (req, res) => {
     }
 };
 
+const getDoctorQueue = async (req, res) => {
+
+    try {
+
+        const userId = req.user.userId;
+        const doctor = await Doctor.findOne({
+            user : userId
+        });
+
+        if(!doctor) {
+            return res.status(404).json({
+                success : false,
+                message : "Doctor profile not found"
+            });
+        }
+
+        const queues = await Queue.find({
+            doctor : doctor._id,
+            status : {
+                $in : ["waiting", "in-consultation"]
+            }
+        })
+        .populate({
+            path : "patient",
+            populate : {
+                path : user,
+                select : "name email"
+            }
+        })
+        .populate({
+            path : "appointment",
+            select : "appointmentDate appointmentTime reason status"
+        })
+        .sort({
+            queueNumber : 1
+        });
+
+        res.status(200).json({
+            success : true,
+            count : queues.length,
+            queues
+        });
+    }
+    catch(error) {
+
+        console.error("Get doctor error", error);
+        res.status(500).json({
+            success : false,
+            message : "Server error"
+        });
+    }
+};
+
+const startConsultation = async (reqq, res) => {
+
+    try {
+
+        const userId = req.user.userId;
+        const queueId = req.params.id;
+
+        const doctor = await Doctor.findOne({
+            user : userId
+        });
+
+        if(!doctor) {
+
+            return res.status(404).json({
+                success : false,
+                message : "Doctor not found"
+            });
+        }
+
+        const queue = await Queue.findById(queueId);
+
+        if(!queue) {
+            return res.status(404).json({
+                success : false,
+                message : "queue entry not found"
+            });
+        }
+
+        if(queue.doctor.toString() !== doctor._id.toString()) {
+            return res.status(403).json({
+                success : false,
+                message : "You are not allowed to manage this queue"
+            });
+        }
+
+        if(queue.status !== "waiting") {
+            return res.status(400).json({
+                success : false,
+                message : "Only waiting patients can start consultation"
+            });
+        }
+
+        queue.status = "in-consultation";
+
+        await queue.save();
+
+
+        const updatedQueue = await Queue.findById(queue._id)
+        .populate({
+            path : "patient",
+            populate : {
+                path : "user",
+                select : "name email"
+            }
+        })
+        .populate({
+            path : "doctor",
+            populate : {
+                path : "user",
+                select : "name email"
+            }
+        })
+        .populate("appointment");
+
+        res.status(200).json({
+            success : true,
+            message : "Consultation started successfully",
+            queue : updatedQueue
+        });
+
+    }
+    catch(error) {
+
+        console.error("Start consultation error", error);
+        res.status(500).json({
+            success : false,
+            message : "Server error"
+        });
+    }
+};
+
+const completeQueue = async (req, res) => {
+
+    try {
+
+        const userId = req.user.userId;
+        const queueId = req.params.id;
+
+        const doctor = await Doctoe.findOne({
+            user : userId
+        });
+
+        if(!doctor) {
+
+            return res.status(404).json({
+                success : false,
+                message : "Doctor not found"
+            });
+        }
+
+        const queue = await Queue.findById(queueId);
+
+        if(!queue) {
+
+            return res.status(404).json({
+                success : false,
+                message : "Queue entry not found"
+            });
+        }
+
+        if(queue.doctor.toString() !== doctor._id.toString()) {
+
+            return res.status(403).json({
+                success : false,
+                message : "You are not allowed to manage this queue"
+            });
+        }
+
+        if(queue.status !== "in-consultation") {
+            return res.status(400).json({
+                success : false,
+                message : "Only active consultation can be completed"
+            });
+        }
+
+        queue.status = "completed";
+        await queue.save();
+
+        const updatedQueue = await Queue.findById(queue._id)
+        .populate({
+            path : "patient",
+            populate : {
+                path : "user",
+                select : "name email"
+            }
+        })
+        .populate({
+            
+            path :"doctor",
+            populate : {
+                path : "user",
+                select :"name email"
+            }
+        })
+        
+        .populate("appointment");
+
+        res.status(200).json({
+            success : true,
+            message : "Queue completed successfully",
+            queue : updatedQueue
+        }); 
+
+    }
+    catch(error) {
+
+        console.error("Completed queue error", error);
+        res.status(500).json({
+            success : false,
+            message : "Server error"
+        });
+    }
+};
+
+const cancelQueue = async (req, res) => {
+
+    try {
+
+        const userId = req.user.userId;
+        const queueId = req.params.id;
+
+        const doctor = await Doctor.findOne({
+            user : userId
+        });
+
+        if(!doctor) {
+            return res.status(404).json({
+                success : false,
+                message : "Doctor profile not found"
+            });
+        }
+
+        const queue = await Queue.findById(queueId);
+
+        if(!queue) {
+
+            return res.status(404).json({
+                success : false,
+                message : "Query entry not found"
+            });
+        }
+
+        if(queue.doctor.toString() !== doctor._id.toString()) {
+
+            return res.status(403).json({
+                success : false,
+                message : "You are not allowed to manage this queue"
+            });
+        }
+
+        if(queue.status !== "waiting") {
+
+            return res.status(400).json({
+                success : false,
+                message : "Only waiting queue entries can be cancelled"
+            });
+        }
+
+        queue.status = "completed";
+        await queue.save();
+
+        const updatedQueue = await Queue.findById(queue._id)
+        .populate({
+            path : "patient",
+            populate : {
+                path : "user",
+                select : "name email"
+            }
+        })
+        .populate({
+            path : "doctor",
+            populate : {
+
+                path : "user",
+                select : "name email"
+            }
+        })
+        .populate("appointment");
+
+        res.status(200).json({
+            success : true,
+            message : "Queue cancelled successfully",
+            queue : updatedQueue
+        });
+    }
+    catch(error) {
+
+        console.error("Cancel queue error ", error);
+        res.status(500).json({
+            success : false,
+            message : "Server error"
+        });
+
+    }
+};
+
 module.exports = {
-    addToQueue
+    addToQueue,
+    getDoctorQueue,
+    startConsultation,
+    completeQueue,
+    cancelQueue
 };
