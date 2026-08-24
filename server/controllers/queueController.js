@@ -1,4 +1,3 @@
-const queue = require("../models/Queue");
 const Appointment = require("../models/Appointment");
 const Patient = require("../models/Patient");
 const Doctor = require("../models/Doctor");
@@ -145,7 +144,7 @@ const getDoctorQueue = async (req, res) => {
         .populate({
             path : "patient",
             populate : {
-                path : user,
+                path : "user",
                 select : "name email"
             }
         })
@@ -173,7 +172,7 @@ const getDoctorQueue = async (req, res) => {
     }
 };
 
-const startConsultation = async (reqq, res) => {
+const startConsultation = async (req, res) => {
 
     try {
 
@@ -261,7 +260,7 @@ const completeQueue = async (req, res) => {
         const userId = req.user.userId;
         const queueId = req.params.id;
 
-        const doctor = await Doctoe.findOne({
+        const doctor = await Doctor.findOne({
             user : userId
         });
 
@@ -361,7 +360,7 @@ const cancelQueue = async (req, res) => {
 
             return res.status(404).json({
                 success : false,
-                message : "Query entry not found"
+                message : "Queue entry not found"
             });
         }
 
@@ -381,7 +380,7 @@ const cancelQueue = async (req, res) => {
             });
         }
 
-        queue.status = "completed";
+        queue.status = "cancelled";
         await queue.save();
 
         const updatedQueue = await Queue.findById(queue._id)
