@@ -13,9 +13,12 @@
   "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "icons": "^1.0.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.1"
   },

@@ -1,44 +1,113 @@
-import { useEffect, useState } from 'react'
+import {
+    BrowserRouter,
+    Routes,
+    Route,
+    Navigate
+} from "react-router-dom";
+
+import { AuthProvider } from "./context/AuthContext";
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
+import PatientDashboard from "./pages/patient/PatientDashboard";
+import PatientProfile from "./pages/patient/PatientProfile";
+import PatientAppointments from "./pages/patient/PatientAppointments";
+import BookAppointment from "./pages/patient/BookAppointment";
+import PatientQueue from "./pages/patient/PatientQueue";
+
+const DoctorDashboard = () => {
+    return <h1>Doctor Dashboard</h1>;
+};
+
+const AdminDashboard = () => {
+    return <h1>Admin Dashboard</h1>;
+};
 
 function App() {
-  
-  const [backendMessage, setBackendMessage] = useState("");
 
-  useEffect(() => {
+    return (
+        <AuthProvider>
 
-    fetch("http://localhost:5000/api/health")
-    .then((response) => response.json())
-    .then((data) => {
-      setBackendMessage(data.message);
-    })
-    .catch((error) => {
-      console.error("Error connecting to backend : ", error);
-    });
+            <BrowserRouter>
 
-  }, []);
-  return (
+                <Routes>
 
-    <div className='container mt-5 text-center'>
-      <h1 className='text-primary'> MedOps</h1>
-      
-      <p className='lead'>Hospital Operations and Patient Flow Platform</p>
+                    <Route
+                        path="/"
+                        element={<Navigate to="/login" />}
+                    />
 
-      <div className='mt-4'>
+                    <Route
+                        path="/login"
+                        element={<Login />}
+                    />
 
-        {backendMessage ? (
-          <div className='alert alert-success'> {backendMessage}</div>
-        ) :(
+                    <Route
+                        path="/patient"
+                        element={
+                            <ProtectedRoute allowedRoles={["patient"]}>
+                                <PatientDashboard />
+                            </ProtectedRoute>
+                        }
+                    />
 
-          <div className='alert alert-warning'> 
-              connecting to backend
-          </div>
-        )
-      
-      }
-      </div>
+                    <Route
+                        path="/doctor"
+                        element={
+                            <ProtectedRoute allowedRoles={["doctor"]}>
+                                <DoctorDashboard />
+                            </ProtectedRoute>
+                        }
+                    />
 
-    </div>
-  )
+                    <Route
+                        path="/admin"
+                        element={
+                            <ProtectedRoute allowedRoles={["admin"]}>
+                                <AdminDashboard />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                  <Route
+                    path="/patient/profile"
+                    element={
+                      <ProtectedRoute allowedRoles={["patient"]}>
+                      <PatientProfile />
+                    </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/patient/appointments"
+                    element={
+                      <ProtectedRoute allowedRoles={["patient"]}>
+                      <PatientAppointments />
+                    </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/patient/appointments/book"
+                    element={
+                    <ProtectedRoute allowedRoles={["patient"]}>
+                      <BookAppointment />
+                    </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/patient/queue"
+                    element={
+                    <ProtectedRoute allowedRoles={["patient"]}>
+                      <PatientQueue />
+                    </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+
+            </BrowserRouter>
+
+        </AuthProvider>
+    );
 }
 
-export default App
+export default App;
