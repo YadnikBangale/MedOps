@@ -276,6 +276,9 @@ const completeQueue = async (req, res) => {
 
     queue.status = "completed";
     await queue.save();
+    await Appointment.findByIdAndUpdate(queue.appointment, {
+      status: "completed",
+    });
 
     const updatedQueue = await Queue.findById(queue._id)
       .populate({
