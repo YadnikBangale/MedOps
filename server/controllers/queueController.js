@@ -5,7 +5,7 @@ const Queue = require("../models/Queue");
 
 const addToQueue = async (req, res) => {
   try {
-    const { appointment, queueNumber } = req.body;
+    const { appointment } = req.body;
 
     const userId = req.user.userId;
 
@@ -62,6 +62,15 @@ const addToQueue = async (req, res) => {
         message: "Doctor not found",
       });
     }
+
+    const lastQueue = await Queue.findOne({
+      doctor: doctor._id,
+      queueDate: appointmentData.appointmentDate,
+    }).sort({
+      queueNumber: -1,
+    });
+
+    const queueNumber = lastQueue ? lastQueue.queueNumber + 1 : 1;
 
     const queue = await Queue.create({
       appointment: appointmentData._id,
@@ -428,5 +437,5 @@ module.exports = {
   startConsultation,
   completeQueue,
   cancelQueue,
-  getMyQueue
+  getMyQueue,
 };

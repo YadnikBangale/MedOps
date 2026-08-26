@@ -4,21 +4,34 @@ import api from "../../services/api";
 
 const PatientAppointments = () => {
   const [appointments, setAppointments] = useState([]);
+  const [queues, setQueues] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [addingToQueue, setAddingToQueue] = useState(null);
+  const [queueSuccess, setQueueSuccess] = useState({});
+
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
 
-        const response = await api.get("/appointments/my", {
+        const config = {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });
+        };
 
-        setAppointments(response.data.appointments || []);
+        const [appointmentsResponse, queueResponse] = await Promise.all([
+          api.get("/appointments/my", config),
+
+          api.get("/queue/my", config),
+        ]);
+
+        setAppointments(appointmentsResponse.data.appointments || []);
+
+        setQueues(queueResponse.data.queues || []);
       } catch (error) {
         setError(
           error.response?.data?.message || "Unable to load appointments",
@@ -28,12 +41,75 @@ const PatientAppointments = () => {
       }
     };
 
-    fetchAppointments();
+    fetchData();
   }, []);
+
+  const getQueueForAppointment = (appointmentId) => {
+    return queues.find((queue) => queue.appointment?._id === appointmentId);
+  };
+
+  const handleAddToQueue = async (appointmentId) => {
+    try {
+      setError("");
+
+      setAddingToQueue(appointmentId);
+
+      const token = localStorage.getItem("token");
+
+      const response = await api.post(
+        "/queue",
+
+        {
+          appointment: appointmentId,
+        },
+
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const newQueue = response.data.queue;
+
+      setQueueSuccess((previous) => ({
+        ...previous,
+
+        [appointmentId]: newQueue.queueNumber,
+      }));
+
+      setQueues((previous) => [...previous, newQueue]);
+    } catch (error) {
+      setError(
+        error.response?.data?.message || "Unable to add appointment to queue",
+      );
+    } finally {
+      setAddingToQueue(null);
+    }
+  };
 
   const getStatusClass = (status) => {
     switch (status) {
       case "scheduled":
+        return "bg-primary";
+
+      case "completed":
+        return "bg-success";
+
+      case "cancelled":
+        return "bg-danger";
+
+      default:
+        return "bg-secondary";
+    }
+  };
+
+  const getQueueStatusClass = (status) => {
+    switch (status) {
+      case "waiting":
+        return "bg-warning text-dark";
+
+      case "in-consultation":
         return "bg-primary";
 
       case "completed":
@@ -79,10 +155,10 @@ const PatientAppointments = () => {
               Appointments
             </Link>
 
-            <a href="#" className="nav-link text-white">
+            <Link to="/patient/queue" className="nav-link text-white">
               <i className="bi bi-list-ol me-2"></i>
               Queue
-            </a>
+            </Link>
 
             <a href="#" className="nav-link text-white">
               <i className="bi bi-file-medical me-2"></i>
@@ -99,6 +175,8 @@ const PatientAppointments = () => {
         {/* Main Content */}
 
         <main className="col-md-9 col-lg-10 p-4">
+          {/* Header */}
+
           <div className="d-flex justify-content-between align-items-center mb-4">
             <div>
               <h2 className="fw-bold mb-1">Appointments</h2>
@@ -154,47 +232,113 @@ const PatientAppointments = () => {
                         <th>Reason</th>
 
                         <th>Status</th>
+
+                        <th>Queue</th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      {appointments.map((appointment) => (
-                        <tr key={appointment._id}>
-                          <td className="px-4">
-                            <div className="fw-semibold">
-                              {appointment.doctor?.user?.name || "Doctor"}
-                            </div>
+                      {appointments.map((appointment) => {
+                        const queue = getQueueForAppointment(appointment._id);
 
-                            <small className="text-muted">
-                              {appointment.doctor?.specialization || "N/A"}
-                            </small>
-                          </td>
+                        return (
+                          <tr key={appointment._id}>
+                            {/* Doctor */}
 
-                          <td>
-                            {appointment.doctor?.department?.name || "N/A"}
-                          </td>
+                            <td className="px-4">
+                              <div className="fw-semibold">
+                                {appointment.doctor?.user?.name || "Doctor"}
+                              </div>
 
-                          <td>
-                            {new Date(
-                              appointment.appointmentDate,
-                            ).toLocaleDateString()}
-                          </td>
+                              <small className="text-muted">
+                                {appointment.doctor?.specialization || "N/A"}
+                              </small>
+                            </td>
 
-                          <td>{appointment.appointmentTime}</td>
+                            {/* Department */}
 
-                          <td>{appointment.reason || "—"}</td>
+                            <td>
+                              {appointment.doctor?.department?.name || "N/A"}
+                            </td>
 
-                          <td>
-                            <span
-                              className={`badge ${getStatusClass(
-                                appointment.status,
-                              )}`}
-                            >
-                              {appointment.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                            {/* Date */}
+
+                            <td>
+                              {new Date(
+                                appointment.appointmentDate,
+                              ).toLocaleDateString()}
+                            </td>
+
+                            {/* Time */}
+
+                            <td>{appointment.appointmentTime}</td>
+
+                            {/* Reason */}
+
+                            <td>{appointment.reason || "—"}</td>
+
+                            {/* Appointment Status */}
+
+                            <td>
+                              <span
+                                className={`badge ${getStatusClass(
+                                  appointment.status,
+                                )}`}
+                              >
+                                {appointment.status}
+                              </span>
+                            </td>
+
+                            {/* Queue */}
+
+                            <td>
+                              {queue ? (
+                                <div>
+                                  <span
+                                    className={`badge ${getQueueStatusClass(
+                                      queue.status,
+                                    )}`}
+                                  >
+                                    <i className="bi bi-list-ol me-1"></i>
+                                    Queue #{queue.queueNumber}
+                                  </span>
+
+                                  <div className="small text-muted mt-1">
+                                    {queue.status}
+                                  </div>
+                                </div>
+                              ) : queueSuccess[appointment._id] ? (
+                                <span className="badge bg-success">
+                                  <i className="bi bi-check-circle me-1"></i>
+                                  Queue #{queueSuccess[appointment._id]}
+                                </span>
+                              ) : appointment.status === "scheduled" ? (
+                                <button
+                                  className="btn btn-sm btn-primary"
+                                  onClick={() =>
+                                    handleAddToQueue(appointment._id)
+                                  }
+                                  disabled={addingToQueue === appointment._id}
+                                >
+                                  {addingToQueue === appointment._id ? (
+                                    <>
+                                      <span className="spinner-border spinner-border-sm me-1"></span>
+                                      Adding...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <i className="bi bi-list-ol me-1"></i>
+                                      Add to Queue
+                                    </>
+                                  )}
+                                </button>
+                              ) : (
+                                <span className="text-muted">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
