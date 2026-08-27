@@ -11,6 +11,7 @@ import PatientQueue from "./pages/patient/PatientQueue";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import DoctorQueue from "./pages/doctor/DoctorQueue";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
+import PatientMedicalRecords from "./pages/patient/PatientMedicalRecords";
 
 const AdminDashboard = () => {
   return <h1>Admin Dashboard</h1>;
@@ -101,6 +102,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["doctor"]}>
                 <DoctorAppointments />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/patient/medical-records"
+            element={
+              <ProtectedRoute allowedRoles={["patient"]}>
+                <PatientMedicalRecords />
               </ProtectedRoute>
             }
           />
