@@ -12,10 +12,10 @@ import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import DoctorQueue from "./pages/doctor/DoctorQueue";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import PatientMedicalRecords from "./pages/patient/PatientMedicalRecords";
-
-const AdminDashboard = () => {
-  return <h1>Admin Dashboard</h1>;
-};
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminDoctors from "./pages/admin/AdminDoctors";
+import AdminPatients from "./pages/admin/AdminPatients";
+import AdminDepartments from "./pages/admin/AdminDepartments";
 
 function App() {
   return (
@@ -110,6 +110,33 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["patient"]}>
                 <PatientMedicalRecords />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/doctors"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminDoctors />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/patients"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminPatients />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/departments"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminDepartments />
               </ProtectedRoute>
             }
           />
