@@ -1,8 +1,84 @@
+import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import api from "../../services/api";
 
 const PatientDashboard = () => {
   const { user, logout } = useAuth();
+
+  const [appointments, setAppointments] = useState([]);
+  const [queue, setQueue] = useState([]);
+  const [medicalRecords, setMedicalRecords] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setError("");
+
+        const token = localStorage.getItem("token");
+
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+        const [appointmentsResponse, queueResponse, recordsResponse] =
+          await Promise.all([
+            api.get("/appointments/my", config),
+            api.get("/queue/my", config),
+            api.get("/medical-records/my", config),
+          ]);
+
+        setAppointments(appointmentsResponse.data.appointments || []);
+
+        setQueue(queueResponse.data.queues || []);
+
+        setMedicalRecords(recordsResponse.data.medicalRecords || []);
+      } catch (error) {
+        setError(
+          error.response?.data?.message || "Unable to load dashboard data",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container-fluid min-vh-100 bg-light d-flex justify-content-center align-items-center">
+        <div className="spinner-border text-primary">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  /*
+   * Only scheduled appointments are considered upcoming.
+   */
+  const upcomingAppointments = appointments.filter(
+    (appointment) => appointment.status === "scheduled",
+  );
+
+  /*
+   * Show the first upcoming appointment.
+   */
+  const upcomingAppointment =
+    upcomingAppointments.length > 0 ? upcomingAppointments[0] : null;
+
+  /*
+   * Find the patient's active queue entry.
+   */
+  const activeQueue = queue.find(
+    (item) => item.status === "waiting" || item.status === "in-consultation",
+  );
 
   return (
     <div className="container-fluid min-vh-100 bg-light">
@@ -13,10 +89,10 @@ const PatientDashboard = () => {
           <h3 className="mb-4">MedOps</h3>
 
           <div className="nav flex-column">
-            <a href="/patient" className="nav-link text-white active">
+            <Link to="/patient" className="nav-link text-white active">
               <i className="bi bi-speedometer2 me-2"></i>
               Dashboard
-            </a>
+            </Link>
 
             <Link to="/patient/appointments" className="nav-link text-white">
               <i className="bi bi-calendar-check me-2"></i>
@@ -28,10 +104,10 @@ const PatientDashboard = () => {
               Queue
             </Link>
 
-            <a href="#" className="nav-link text-white">
+            <Link to="/patient/medical-records" className="nav-link text-white">
               <i className="bi bi-file-medical me-2"></i>
               Medical Records
-            </a>
+            </Link>
 
             <Link to="/patient/profile" className="nav-link text-white">
               <i className="bi bi-person me-2"></i>
@@ -67,9 +143,15 @@ const PatientDashboard = () => {
             </div>
           </div>
 
+          {/* Error */}
+
+          {error && <div className="alert alert-danger">{error}</div>}
+
           {/* Summary Cards */}
 
           <div className="row g-4 mb-4">
+            {/* Upcoming Appointments */}
+
             <div className="col-md-4">
               <div className="card border-0 shadow-sm h-100">
                 <div className="card-body">
@@ -77,7 +159,7 @@ const PatientDashboard = () => {
                     <div>
                       <p className="text-muted mb-1">Upcoming Appointments</p>
 
-                      <h3 className="fw-bold">1</h3>
+                      <h3 className="fw-bold">{upcomingAppointments.length}</h3>
                     </div>
 
                     <i className="bi bi-calendar-check fs-2 text-primary"></i>
@@ -86,6 +168,8 @@ const PatientDashboard = () => {
               </div>
             </div>
 
+            {/* Queue Position */}
+
             <div className="col-md-4">
               <div className="card border-0 shadow-sm h-100">
                 <div className="card-body">
@@ -93,7 +177,9 @@ const PatientDashboard = () => {
                     <div>
                       <p className="text-muted mb-1">Queue Position</p>
 
-                      <h3 className="fw-bold">1</h3>
+                      <h3 className="fw-bold">
+                        {activeQueue ? activeQueue.queueNumber : "-"}
+                      </h3>
                     </div>
 
                     <i className="bi bi-list-ol fs-2 text-primary"></i>
@@ -102,6 +188,8 @@ const PatientDashboard = () => {
               </div>
             </div>
 
+            {/* Medical Records */}
+
             <div className="col-md-4">
               <div className="card border-0 shadow-sm h-100">
                 <div className="card-body">
@@ -109,7 +197,7 @@ const PatientDashboard = () => {
                     <div>
                       <p className="text-muted mb-1">Medical Records</p>
 
-                      <h3 className="fw-bold">1</h3>
+                      <h3 className="fw-bold">{medicalRecords.length}</h3>
                     </div>
 
                     <i className="bi bi-file-medical fs-2 text-primary"></i>
@@ -125,27 +213,58 @@ const PatientDashboard = () => {
             <div className="card-body">
               <h5 className="fw-bold mb-3">Upcoming Appointment</h5>
 
-              <div className="row">
-                <div className="col-md-8">
-                  <h5>Dr. Rahul Sharma</h5>
+              {upcomingAppointment ? (
+                <div className="row">
+                  <div className="col-md-8">
+                    <h5>
+                      Dr. {upcomingAppointment.doctor?.user?.name || "Doctor"}
+                    </h5>
 
-                  <p className="text-muted mb-1">Cardiac Electrophysiology</p>
+                    <p className="text-muted mb-1">
+                      {upcomingAppointment.doctor?.specialization ||
+                        "Specialization not available"}
+                    </p>
 
-                  <p className="mb-0">
-                    <i className="bi bi-calendar me-2"></i>
-                    27 August 2026
+                    <p className="mb-1">
+                      <i className="bi bi-calendar me-2"></i>
+
+                      {upcomingAppointment.appointmentDate
+                        ? new Date(
+                            upcomingAppointment.appointmentDate,
+                          ).toLocaleDateString()
+                        : "Date not available"}
+                    </p>
+
+                    <p className="mb-0">
+                      <i className="bi bi-clock me-2"></i>
+
+                      {upcomingAppointment.appointmentTime ||
+                        "Time not available"}
+                    </p>
+                  </div>
+
+                  <div className="col-md-4 text-md-end">
+                    <span className="badge bg-success">
+                      {upcomingAppointment.status}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <i className="bi bi-calendar-x fs-1 text-muted"></i>
+
+                  <p className="text-muted mt-2 mb-0">
+                    No upcoming appointments.
                   </p>
 
-                  <p>
-                    <i className="bi bi-clock me-2"></i>
-                    12:00
-                  </p>
+                  <Link
+                    to="/patient/appointments/book"
+                    className="btn btn-primary mt-3"
+                  >
+                    Book Appointment
+                  </Link>
                 </div>
-
-                <div className="col-md-4 text-md-end">
-                  <span className="badge bg-success">Scheduled</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </main>

@@ -175,6 +175,7 @@ const AdminDoctors = () => {
           licenseNumber: editingDoctor.licenseNumber,
           experience: Number(editingDoctor.experience),
           consultationFee: Number(editingDoctor.consultationFee),
+          password: editingDoctor.password,
         },
         {
           headers: {
@@ -289,6 +290,8 @@ const AdminDoctors = () => {
 
                 <form onSubmit={handleAddDoctor}>
                   <div className="row g-3">
+                    {/* Name */}
+
                     <div className="col-md-6">
                       <label className="form-label fw-semibold" htmlFor="name">
                         Full Name
@@ -306,6 +309,8 @@ const AdminDoctors = () => {
                       />
                     </div>
 
+                    {/* Email */}
+
                     <div className="col-md-6">
                       <label className="form-label fw-semibold" htmlFor="email">
                         Email
@@ -322,6 +327,8 @@ const AdminDoctors = () => {
                         required
                       />
                     </div>
+
+                    {/* Password */}
 
                     <div className="col-md-6">
                       <label
@@ -342,6 +349,8 @@ const AdminDoctors = () => {
                         required
                       />
                     </div>
+
+                    {/* Department */}
 
                     <div className="col-md-6">
                       <label
@@ -369,6 +378,8 @@ const AdminDoctors = () => {
                       </select>
                     </div>
 
+                    {/* Specialization */}
+
                     <div className="col-md-6">
                       <label
                         className="form-label fw-semibold"
@@ -389,6 +400,8 @@ const AdminDoctors = () => {
                       />
                     </div>
 
+                    {/* License Number */}
+
                     <div className="col-md-6">
                       <label
                         className="form-label fw-semibold"
@@ -408,6 +421,8 @@ const AdminDoctors = () => {
                         required
                       />
                     </div>
+
+                    {/* Experience */}
 
                     <div className="col-md-6">
                       <label
@@ -430,6 +445,8 @@ const AdminDoctors = () => {
                       />
                     </div>
 
+                    {/* Consultation Fee */}
+
                     <div className="col-md-6">
                       <label
                         className="form-label fw-semibold"
@@ -451,6 +468,8 @@ const AdminDoctors = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Add Buttons */}
 
                   <div className="d-flex gap-2 mt-4">
                     <button
@@ -517,6 +536,31 @@ const AdminDoctors = () => {
                         value={editingDoctor.user?.email || ""}
                         disabled
                       />
+                    </div>
+
+                    {/* New Password */}
+
+                    <div className="col-md-6">
+                      <label
+                        className="form-label fw-semibold"
+                        htmlFor="editPassword"
+                      >
+                        New Password
+                      </label>
+
+                      <input
+                        id="editPassword"
+                        name="password"
+                        type="password"
+                        className="form-control"
+                        value={editingDoctor.password || ""}
+                        onChange={handleEditChange}
+                        placeholder="Leave blank to keep current password"
+                      />
+
+                      <small className="text-muted">
+                        Leave blank if you don't want to change the password.
+                      </small>
                     </div>
 
                     {/* Department */}
@@ -633,6 +677,8 @@ const AdminDoctors = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Edit Buttons */}
 
                   <div className="d-flex gap-2 mt-4">
                     <button
@@ -788,6 +834,8 @@ const AdminDoctors = () => {
 
                                     consultationFee:
                                       doctor.consultationFee ?? "",
+
+                                    password: "",
                                   });
                                 }}
                               >

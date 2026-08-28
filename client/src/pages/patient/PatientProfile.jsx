@@ -136,20 +136,20 @@ const PatientProfile = () => {
               Dashboard
             </Link>
 
-            <a href="#" className="nav-link text-white">
+            <Link to="/patient/appointments" className="nav-link text-white">
               <i className="bi bi-calendar-check me-2"></i>
               Appointments
-            </a>
+            </Link>
 
-            <a href="#" className="nav-link text-white">
+            <Link to="/patient/queue" className="nav-link text-white">
               <i className="bi bi-list-ol me-2"></i>
               Queue
-            </a>
+            </Link>
 
-            <a href="#" className="nav-link text-white">
+            <Link to="/patient/medical-records" className="nav-link text-white">
               <i className="bi bi-file-medical me-2"></i>
               Medical Records
-            </a>
+            </Link>
 
             <Link to="/patient/profile" className="nav-link text-white active">
               <i className="bi bi-person me-2"></i>

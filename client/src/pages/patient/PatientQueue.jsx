@@ -82,10 +82,10 @@ const PatientQueue = () => {
               Queue
             </Link>
 
-            <a href="#" className="nav-link text-white">
+            <Link to="/patient/medical-records" className="nav-link text-white">
               <i className="bi bi-file-medical me-2"></i>
               Medical Records
-            </a>
+            </Link>
 
             <Link to="/patient/profile" className="nav-link text-white">
               <i className="bi bi-person me-2"></i>

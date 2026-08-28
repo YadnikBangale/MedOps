@@ -78,10 +78,10 @@ const DoctorDashboard = () => {
               Appointments
             </Link>
 
-            <a href="#" className="nav-link text-white">
+            <Link to="/doctor/medical-records" className="nav-link text-white">
               <i className="bi bi-file-medical me-2"></i>
               Medical Records
-            </a>
+            </Link>
           </div>
         </aside>
 

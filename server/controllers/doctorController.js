@@ -212,6 +212,7 @@ const updateDoctor = async (req, res) => {
       licenseNumber,
       experience,
       consultationFee,
+      password,
     } = req.body;
 
     const doctor = await Doctor.findById(id);
@@ -268,6 +269,14 @@ const updateDoctor = async (req, res) => {
 
     if (consultationFee != undefined) {
       doctor.consultationFee = consultationFee;
+    }
+
+    if (password !== undefined && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      await User.findByIdAndUpdate(doctor.user, {
+        password: hashedPassword,
+      });
     }
 
     await doctor.save();
